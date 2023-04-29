@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState} from "react";
 import {
   Text,
   StyleSheet,
@@ -10,21 +10,39 @@ import {
   Platform,
   Pressable,
 } from "react-native";
+import { Camera } from "expo-camera";
 import { MaterialIcons } from "@expo/vector-icons";
 import { Ionicons } from "@expo/vector-icons";
 import { FontAwesome5 } from "@expo/vector-icons";
 
-export default function CreatePostsScreen() {
+export default function CreatePostsScreen({navigation}) {
   const [name, setName] = useState("");
   const [location, setLocation] = useState("");
-
   const [isShowKeyboard, setIsShowKeyboard] = useState(false);
   const [isNameFocus, setIsNameFocus] = useState(false);
   const [isLocationFocus, setIsLocationFocus] = useState(false);
 
+  const [camera, setCamera] = useState(null);
+  const [photo, setPhoto] = useState(null);
+
   const keyboardHide = () => {
     setIsShowKeyboard(false);
     Keyboard.dismiss();
+  };
+
+  const takePhoto = async () => {
+    const photo = await camera.takePictureAsync();
+    setPhoto(photo.uri);
+    // console.log(photo.uri);
+  };
+
+  const sendPhoto = () => {
+    console.log("navigation", navigation);
+    navigation.navigate("Публикации", {  photo, name, location  });
+    setName("")
+    setLocation("")
+    setPhoto(null)
+    setIsShowKeyboard(false)
   };
 
   return (
@@ -34,15 +52,17 @@ export default function CreatePostsScreen() {
           <KeyboardAvoidingView behavior={Platform.OS === "ios" && "padding"}>
             {!isShowKeyboard && (
               <View>
-                <View style={styles.imageBackground}>
-                  <View style={styles.photoIconWrap}>
+      
+                <Camera style={styles.camera} ref={setCamera}>
+                  <Pressable onPress={takePhoto} style={styles.snapContainer}>
                     <MaterialIcons
                       name="photo-camera"
                       size={24}
                       color="#BDBDBD"
                     />
-                  </View>
-                </View>
+                  </Pressable>
+                  </Camera>
+        
                 <Text style={styles.text}>Загрузите фото</Text>
               </View>
             )}
@@ -91,7 +111,7 @@ export default function CreatePostsScreen() {
                 }}
               />
             </View>
-            <Pressable style={styles.button}>
+            <Pressable onPress={sendPhoto} style={styles.sendBtn}>
               <Text style={styles.buttonText}>Опубликовать</Text>
             </Pressable>
             <View style={styles.trashIconWrap}>
@@ -112,7 +132,7 @@ const styles = StyleSheet.create({
     paddingTop: 28,
     backgroundColor: "#fff",
   },
-  imageBackground: {
+  camera: {
     width: "100%",
     height: 200,
     backgroundColor: "#F6F6F6",
@@ -122,10 +142,10 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  photoIconWrap: {
+  snapContainer: {
     width: 60,
     height: 60,
-    backgroundColor: "#fff",
+    backgroundColor: "#FFFFFF4D",
     justifyContent: "center",
     alignItems: "center",
     borderRadius: 50,
@@ -147,10 +167,10 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: 7,
   },
-  button: {
+  sendBtn: {
     width: "100%",
     height: 50,
-    backgroundColor: "#F6F6F6",
+    backgroundColor: "#FF6C00",
     borderRadius: 100,
     justifyContent: "center",
     alignItems: "center",
@@ -158,7 +178,7 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     fontFamily: "Roboto-Regular",
-    color: "#BDBDBD",
+    color: "#FFFFFF",
     fontSize: 16,
   },
   trashButton: {
