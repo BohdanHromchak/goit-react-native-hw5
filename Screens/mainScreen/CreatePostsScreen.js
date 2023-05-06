@@ -1,4 +1,4 @@
-import React, { useState} from "react";
+import React, { useState } from "react";
 import {
   Text,
   StyleSheet,
@@ -14,8 +14,9 @@ import { Camera } from "expo-camera";
 import { MaterialIcons } from "@expo/vector-icons";
 import { Ionicons } from "@expo/vector-icons";
 import { FontAwesome5 } from "@expo/vector-icons";
+import * as Location from "expo-location";
 
-export default function CreatePostsScreen({navigation}) {
+export default function CreatePostsScreen({ navigation }) {
   const [name, setName] = useState("");
   const [location, setLocation] = useState("");
   const [isShowKeyboard, setIsShowKeyboard] = useState(false);
@@ -25,6 +26,8 @@ export default function CreatePostsScreen({navigation}) {
   const [camera, setCamera] = useState(null);
   const [photo, setPhoto] = useState(null);
 
+  const [photoLocation, setPhotoLocation] = useState(null);
+
   const keyboardHide = () => {
     setIsShowKeyboard(false);
     Keyboard.dismiss();
@@ -33,16 +36,29 @@ export default function CreatePostsScreen({navigation}) {
   const takePhoto = async () => {
     const photo = await camera.takePictureAsync();
     setPhoto(photo.uri);
-    // console.log(photo.uri);
+
+    let { status } = await Location.requestForegroundPermissionsAsync();
+    if (status !== "granted") {
+      console.log("Permission to access location was denied");
+    }
+
+    const photoLocation = await Location.getCurrentPositionAsync({});
+
+    const coords = {
+      latitude: photoLocation.coords.latitude,
+      longitude: photoLocation.coords.longitude,
+    };
+
+    setPhotoLocation(coords);
   };
 
   const sendPhoto = () => {
-    console.log("navigation", navigation);
-    navigation.navigate("Публикации", {  photo, name, location  });
-    setName("")
-    setLocation("")
-    setPhoto(null)
-    setIsShowKeyboard(false)
+    navigation.navigate("Публикации", { photo, name, location, ...photoLocation });
+    setName("");
+    setLocation("");
+    setPhoto(null);
+    setIsShowKeyboard(false);
+    // console.log({ photo, name, location, ...photoLocation })
   };
 
   return (
@@ -52,7 +68,6 @@ export default function CreatePostsScreen({navigation}) {
           <KeyboardAvoidingView behavior={Platform.OS === "ios" && "padding"}>
             {!isShowKeyboard && (
               <View>
-      
                 <Camera style={styles.camera} ref={setCamera}>
                   <Pressable onPress={takePhoto} style={styles.snapContainer}>
                     <MaterialIcons
@@ -61,8 +76,8 @@ export default function CreatePostsScreen({navigation}) {
                       color="#BDBDBD"
                     />
                   </Pressable>
-                  </Camera>
-        
+                </Camera>
+
                 <Text style={styles.text}>Загрузите фото</Text>
               </View>
             )}

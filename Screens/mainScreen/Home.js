@@ -12,6 +12,7 @@ export default function Home({ navigation }) {
     <BottomTab.Navigator
       initialRouteName="Публикации"
       screenOptions={{
+     
         headerTitleAlign: "center",
         headerStyle: styles.header,
         tabBarShowLabel: false,

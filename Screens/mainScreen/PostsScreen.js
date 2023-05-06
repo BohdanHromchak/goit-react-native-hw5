@@ -1,5 +1,12 @@
 import { useState, useEffect } from "react";
-import { Text, Image, View, StyleSheet, FlatList } from "react-native";
+import {
+  Text,
+  Image,
+  View,
+  StyleSheet,
+  FlatList,
+  Pressable,
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { EvilIcons } from "@expo/vector-icons";
 
@@ -24,10 +31,10 @@ const initialPosts = [
   // },
 ];
 
-export default function PostsScreen({ route }) {
+export default function PostsScreen({ route, navigation }) {
   // console.log(route.params);
-  
-  const [posts, setPosts] = useState(initialPosts);
+
+  const [posts, setPosts] = useState([]);
 
   useEffect(() => {
     if (route.params) {
@@ -53,27 +60,36 @@ export default function PostsScreen({ route }) {
         keyExtractor={(item, indx) => indx.toString()}
         renderItem={({ item }) => (
           <View style={styles.postContainer}>
-            <Image 
-            // source={item.photo} 
-            source={{ uri: item.photo }}
-            style={styles.postImg} />
+            <Image
+              // source={item.photo}
+              source={{ uri: item.photo }}
+              style={styles.postImg}
+            />
 
             <Text style={styles.postName}>{item.name}</Text>
 
             <View style={styles.infoWrap}>
-              <View style={styles.comments}>
+              <Pressable
+                style={styles.comments}
+                onPress={() => {
+                  navigation.navigate("Комментарии", { image: item.photo });
+                }}
+              >
                 <EvilIcons name="comment" size={24} color="#BDBDBD" />
                 <Text style={styles.commentText}>0</Text>
-              </View>
+              </Pressable>
 
-              <View style={styles.location}>
+              <Pressable
+                style={styles.location}
+                onPress={() => navigation.navigate("Карта", {name: item.name, latitude: item.latitude, longitude: item.longitude})}
+              >
                 <Ionicons
                   name="ios-location-outline"
                   size={24}
                   color="#BDBDBD"
                 />
                 <Text style={styles.locationText}>{item.location}</Text>
-              </View>
+              </Pressable>
             </View>
           </View>
         )}
@@ -132,17 +148,17 @@ const styles = StyleSheet.create({
   location: { flexDirection: "row", alignItems: "center" },
   commentText: {
     fontFamily: "Roboto-Medium",
-    fontWeight: '400',
+    fontWeight: "400",
     fontSize: 16,
-    color: '#BDBDBD',
+    color: "#BDBDBD",
     lineHeight: 19,
   },
   locationText: {
     fontFamily: "Roboto-Medium",
-    fontWeight: '400',
+    fontWeight: "400",
     fontSize: 16,
-    color: '#212121',
+    color: "#212121",
     lineHeight: 19,
-    textDecorationLine: 'underline',
+    textDecorationLine: "underline",
   },
 });
